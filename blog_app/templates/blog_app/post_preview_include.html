@@ -1,0 +1,19 @@
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        <p class="card-text">
+            {% if post.is_published %}
+            <span class="text-success">Опубликовано</span>
+            {% else %}
+            <span class="text-danger">Не опубликовано</span>
+            {% endif %}
+        </p>
+        <p class="card-text">
+            {% for hashtag in post.hashtags.all %}
+            <span class="hashtag">{{ hashtag }}</span>
+            {% endfor %}
+        </p>
+        <a href="{% url 'post_by_slug' post.slug %}" class="btn btn-primary">Читать пост</a>
+    </div>
+</div>

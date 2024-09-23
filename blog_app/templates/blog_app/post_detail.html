@@ -1,15 +1,22 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }}</title>
-  </head>
-  <body>
-    <h1>{{title}}</h1>
-    <p>Текст поста: {{post}}</p>
-    <p>Теги: {{hashtags}}</p>
-    <p>Просмотры: {{views}}</p>
-    <p>Лайки: {{likes}}</p>
-  </body>
-</html>
+{% extends 'base.html' %}
+{% load md_to_html %}
+
+
+
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  
+  <h1>{{ post.title }}</h1>
+  {% md_to_html post.text %}
+  <p>Теги: 
+    {% for hashtag in post.tags.all %}
+      <span class="hashtag"> <a href="{% url "posts_by_tag" hashtag.slug %}">{{ hashtag.name }}</a></span>
+    {% endfor %}
+  </p>
+  {% comment %} <p>Просмотры: {{ views }}</p>
+  <p>Лайки: {{ likes }}</p> {% endcomment %}
+</div>
+{% endblock %}

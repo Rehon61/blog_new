@@ -1,0 +1,28 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<div class="container justify-content-center">
+  <div class="col-6">
+    <h1>Добавить пост</h1>
+    {% comment %} message - инфо сообщения пользователю {% endcomment %}
+    {% if message %}
+    <p class="alert alert-success">{{ message }}</p>
+    {% endif %}
+    <form method="POST">
+        {% comment %} Токен безопасности, нужен при ВСЕХ POST запросах {% endcomment %}
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="title" class="form-label">Заголовок поста</label>
+          <input type="text" class="form-control" name="title" id="title">
+        </div>
+        <div class="mb-3">
+          <label for="text" class="form-label">Текст поста</label>
+          <input type="text" class="form-control" id="text" name="text">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Отправить</button>
+      </form>
+  </div>
+</div>
+
+
+{% endblock %}
