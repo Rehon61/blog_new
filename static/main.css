@@ -1,0 +1,30 @@
+.hashtag {
+  display: inline-block;
+  background-color: #eee;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  border: 1px solid black;
+  box-shadow: 0 0 0.2em black;
+  font-size: 0.5em;
+}
+
+/* Основной контейнер занимает всю высоту экрана */
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Основной контент занимает все пространство между шапкой и подвалом */
+main {
+  flex: 1;
+}
+
+/* Стиль подвала */
+footer {
+  background-color: #343a40;
+  color: rgb(165, 165, 165);
+  text-align: center;
+  padding: 1rem;
+}
