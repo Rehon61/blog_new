@@ -11,15 +11,7 @@ menu = [
 
 
 def blog(request) -> HttpResponse:
-    """
-    Функция представления для отображения главной страницы блога.
-    Параметры:
-    request: объект запроса Django, который содержит информацию оем запросе.
 
-   вращает:
-    HttpResponse: HTTP-ответ с отрендеренной страницей 'index.html'
-    и контекст, содержащим список постов блога.
-    """
     context = {
         'posts': Post.objects.all(),
         'menu': menu,
@@ -29,10 +21,7 @@ def blog(request) -> HttpResponse:
 
 
 def post_by_slug(request, post_slug) -> HttpResponse:
-    """
-    Проходим словарей dataset и ищем совпадение по слагу    Если пост не, возвращаем 404.
-    В противном случае возвращаем детальную информацию о посте.
-    """
+
     post = get_object_or_404(Post, slug=post_slug)
     context = {
         "post": post,

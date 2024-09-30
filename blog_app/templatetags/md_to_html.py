@@ -5,7 +5,6 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-
 @register.simple_tag(name='md_to_html')
 def markdown_to_html(markdown_text: str) -> str:
 

@@ -35,17 +35,6 @@ class Post(models.Model):
         verbose_name_plural = "Посты"
 
 
-# 3. **Tag**
-#    - Назначение: Модель для тегов постов.
-#    - Поля:
-#      - `name`: `CharField` с `max_length=100`, `unique=True`.
-#      - `slug`: `SlugField` с `unique=True`.
-#    - Методы:
-#      - `save(self, *args, **kwargs)`: Переопределение для автоматической генерации `slug` и приведения имени к нижнему регистру.
-#      - `__str__(self)`: Строковое представление модели.
-#      - `get_absolute_url(self)`: Метод для получения абсолютного URL тега (необязательно, но рекомендуется).
-
-
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
