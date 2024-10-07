@@ -1,6 +1,10 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from .dataset import dataset
 from .models import Post, Tag, Category
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .templatetags.md_to_html import markdown_to_html
 
 menu = [
     {"name": "Главная", "alias": "main"},
@@ -12,8 +16,16 @@ menu = [
 
 def blog(request) -> HttpResponse:
 
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        posts = Post.objects.filter(text__icontains=search_query).filter(status='published').order_by('-created_at')
+
+    else:
+        posts = Post.objects.filter(status='published').order_by('-created_at')
+
     context = {
-        'posts': Post.objects.all(),
+        'posts': posts,
         'menu': menu,
         'page_alias': 'blog'
     }
@@ -60,39 +72,35 @@ def add_post(request):
 
     # Если запрос типа POST - форма была отправлена и мы можем добавить пост
     elif request.method == "POST":
-        # Получаем данные из формы
-        # Ключи = атрибуты name в <input>
+
         title = request.POST['title']
         text = request.POST['text']
-
-        # Проверяем что такого title нет в базе данных
-        # Если есть - выдаём ошибку
+        tags = request.POST['tags']
 
         if Post.objects.filter(title=title).exists():
             context.update({'message': 'Такой заголовок уже существует!'})
             return render(request, 'blog_app/add_post.html', context=context)
 
-        # Пытаемся опознать пользователя
         user = request.user
 
-        if title and text:
-            # if not Post.objects.filter(slug=slug).exists():
-            # Создаем объект поста и сохраняем его в базу данных
-            post = Post()
-            post.title = title
-            post.text = text
-            post.author = user
-            post.save()
+        if title and text and tags:
+            post = Post.objects.create(
+                title=title,
+                text=text,
+                author=user
+            )
+            tag_list = [tag.strip().lower().replace(' ', '_') for tag in tags.split(',') if tag.strip()]
+            for tag_name in tag_list:
+                tag = Tag.objects.get_or_create(name=tag_name)
+                post.tags.add(tag)
 
             context.update({'message': 'Пост успешно добавлен!'})
-            return render(request, 'blog_app/add_post.html', context)
+            # return redirect( 'post_by_slug', post_slug=post.slug)
         else:
-            context.update({'message': 'Такой пост уже существует!'})
-            return render(request, 'blog_app/add_post.html', context)
+            context.update({'message': 'Заполните все поля!'})
+            return render(request, 'blog_app/add_post.html', context=context)
 
-    else:
-        context.update({'message': 'Заполните все поля!'})
-        return render(request, 'blog_app/add_post.html', context)
+    return render(request, 'blog_app/add_post.html', context=context)
 
 
 def posts_by_tag(request, tag):
@@ -113,3 +121,11 @@ def posts_by_category(request, category):
         'page_alias': 'blog'
     }
     return render(request, 'blog_app/blog.html', context=context)
+
+#@csrf_exempt
+def preview_post(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        text = data.get("text", "")
+        html = markdown_to_html(text)
+        return JsonResponse({"html": html})

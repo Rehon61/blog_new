@@ -5,7 +5,7 @@
             {% if post.cover_image %}
                 <img src="{{ post.cover_image.url }}" class="img-fluid rounded-start" alt="{{ post.title }}">
             {% else %}
-                <img src="{% static 'image/no_image.png'" class="img-fluid rounded-start" alt="No image">
+                <img src="{% static 'images/no_image.png' %}" class="img-fluid rounded-start" alt="No image">
             {% endif %}
         </div>
 

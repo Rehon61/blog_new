@@ -1,0 +1,9 @@
+<form action="{% url 'blog' %}" method="get" class="mb-4">
+    <div class="input-group mb-3">
+        <input type="text" name="search" class="form-control" placeholder="Поиск по постам..." value="{{ request.GET.search }}">
+        <button class="btn btn-warning" type="submit">
+            <i class="bi bi-search"></i>
+            <span class="d-none d-sm-inline ms-1">Поиск</span>
+        </button>
+    </div>
+</form>

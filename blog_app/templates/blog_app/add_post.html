@@ -1,28 +1,61 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %}
+{% load static %}
+{% load md_to_html %}
+{% block content %}
 
 <div class="container justify-content-center">
-  <div class="col-6">
-    <h1>Добавить пост</h1>
-    {% comment %} message - инфо сообщения пользователю {% endcomment %}
-    {% if message %}
-    <p class="alert alert-success">{{ message }}</p>
-    {% endif %}
-    <form method="POST">
-        {% comment %} Токен безопасности, нужен при ВСЕХ POST запросах {% endcomment %}
+  <div class="row">
+    <div class="col-6">
+      <h1>Добавить пост</h1>
+      {% if message %}
+      <p class="alert alert-success">{{ message }}</p>
+      {% endif %}
+      <form method="POST">
         {% csrf_token %}
         <div class="mb-3">
           <label for="title" class="form-label">Заголовок поста</label>
           <input type="text" class="form-control" name="title" id="title">
         </div>
+
+        <div class="mb-3">
+          <label for="tags" class="form-label">Теги</label>
+          <input type="text" class="form-control" id="tags" name="tags" placeholder="например: django,python,веб разработка">
+        </div>
         <div class="mb-3">
           <label for="text" class="form-label">Текст поста</label>
-          <input type="text" class="form-control" id="text" name="text">
+          <textarea class="form-control" id="text" name="text" rows="5"></textarea>
         </div>
-
         <button type="submit" class="btn btn-primary">Отправить</button>
       </form>
+    </div>
+    <div class="col-6">
+      <h2>Предпросмотр</h2>
+      <div id="preview"></div>
+    </div>
   </div>
 </div>
 
+<script>
+let timeout = null;
+document.getElementById('text').addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+        const text = document.getElementById('text').value;
+        fetch('{% url "preview_post" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({text: text})
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('preview').innerHTML = data.html;
+            hljs.highlightAll();
+        });
+    }, 1000);
+});
+</script>
 
 {% endblock %}
