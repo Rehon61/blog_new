@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from .dataset import dataset
-from .models import Post
+from .models import Post, Tag, Category
 
 menu = [
     {"name": "Главная", "alias": "main"},
@@ -101,6 +101,14 @@ def posts_by_tag(request, tag):
     """
     context = {
         'posts': Post.objects.filter(tags__slug=tag),
+        'menu': menu,
+        'page_alias': 'blog'
+    }
+    return render(request, 'blog_app/blog.html', context=context)
+
+def posts_by_category(request, category):
+    context = {
+        'posts': Category.objects.get(slug=category).posts.all(),
         'menu': menu,
         'page_alias': 'blog'
     }

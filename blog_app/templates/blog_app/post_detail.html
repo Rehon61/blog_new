@@ -13,7 +13,7 @@
   {% md_to_html post.text %}
   <p>Теги: 
     {% for hashtag in post.tags.all %}
-      <span class="hashtag"> <a href="{% url "posts_by_tag" hashtag.slug %}">{{ hashtag.name }}</a></span>
+      <span class="hashtag"> <a href="{{hashtag.get_absolute_url}}">{{ hashtag.name }}</a></span>
     {% endfor %}
   </p>
   {% comment %} <p>Просмотры: {{ views }}</p>
