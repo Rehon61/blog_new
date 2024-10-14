@@ -6,4 +6,24 @@
             <span class="d-none d-sm-inline ms-1">Поиск</span>
         </button>
     </div>
+    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center">
+        <div class="form-check me-sm-4 mb-2 mb-sm-0">
+            <input class="form-check-input" type="checkbox" name="search_category" id="searchCategory" {% if request.GET.search_category %}checked{% endif %}>
+            <label class="form-check-label" for="searchCategory">
+                <i class="bi bi-tags me-1 text-warning"></i> Поиск по категории
+            </label>
+        </div>
+        <div class="form-check me-sm-4 mb-2 mb-sm-0">
+            <input class="form-check-input" type="checkbox" name="search_tag" id="searchTag" {% if request.GET.search_tag %}checked{% endif %}>
+            <label class="form-check-label" for="searchTag">
+                <i class="bi bi-hash me-1 text-success"></i> Поиск по тегу
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="search_comments" id="searchComments" {% if request.GET.search_comments %}checked{% endif %}>
+            <label class="form-check-label" for="searchComments">
+                <i class="bi bi-chat-text me-1 text-info"></i> Поиск по комментариям
+            </label>
+        </div>
+    </div>
 </form>

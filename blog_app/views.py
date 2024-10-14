@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from .dataset import dataset
 from .models import Post, Tag, Category
+from django.db.models import F,Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -15,26 +16,37 @@ menu = [
 
 
 def blog(request) -> HttpResponse:
+    search_query = request.GET.get("search", "")
+    search_category = request.GET.get("search_category")
+    search_tag = request.GET.get("search_tag")
+    search_comments = request.GET.get("search_comments")
 
-    search_query = request.GET.get('search', '')
+    posts = Post.objects.filter(status="published")
 
     if search_query:
-        posts = Post.objects.filter(text__icontains=search_query).filter(status='published').order_by('-created_at')
+        query = Q(title__icontains=search_query) | Q(text__icontains=search_query)
 
-    else:
-        posts = Post.objects.filter(status='published').order_by('-created_at')
+        if search_category:
+            query |= Q(category__name__icontains=search_query)
 
-    context = {
-        'posts': posts,
-        'menu': menu,
-        'page_alias': 'blog'
-    }
+        if search_tag:
+            query |= Q(tags__name__icontains=search_query)
+
+        if search_comments:
+            query |= Q(comment__text__icontains=search_query)
+
+        posts = posts.filter(query)
+
+    posts = posts.distinct().order_by("-created_at")
+
+    context = {"posts": posts, "menu": menu, "page_alias": "blog"}
     return render(request, 'blog_app/blog.html', context=context)
 
 
 def post_by_slug(request, post_slug) -> HttpResponse:
 
     post = get_object_or_404(Post, slug=post_slug)
+    Post.objects.filter(slug=post_slug).update(views=F('views') + 1)
     context = {
         "post": post,
         "menu": menu,
@@ -89,9 +101,13 @@ def add_post(request):
                 text=text,
                 author=user
             )
-            tag_list = [tag.strip().lower().replace(' ', '_') for tag in tags.split(',') if tag.strip()]
+            tag_list = [tag.strip().lower().replace(' ', '_')
+                        for tag in tags.split(',')
+                        if tag.strip()
+                        ]
+
             for tag_name in tag_list:
-                tag = Tag.objects.get_or_create(name=tag_name)
+                tag,created = Tag.objects.get_or_create(name=tag_name)
                 post.tags.add(tag)
 
             context.update({'message': 'Пост успешно добавлен!'})
