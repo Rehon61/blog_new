@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
+{% load cache %}
+
 
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
+{% cache 3600 index_page %}
 <div class="container">
     <h1>Добро пожаловать на главную страницу!</h1>
     <p>Тут должна быть какая-то информация!</p>
 </div>
+{% endcache %}
 {% endblock %}

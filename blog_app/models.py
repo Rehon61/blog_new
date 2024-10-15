@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from unidecode import unidecode
-
+from django.core.cache import cache
 
 class Post(models.Model):
     STATUS_CHOICES = (
@@ -36,7 +36,14 @@ class Post(models.Model):
         """
         slug = slugify(unidecode(self.title))
         self.slug = slug
+
+
         super().save(*args, **kwargs)
+        cache.delete(f'post_preview {self.id}')
+        # Сброс кеша детального просмотра поста
+        cache.delete(f'post_detail {self.id}')
+        # Сброс кеша списка постов (можно сбросить весь кеш каталога или определенные страницы)
+        cache.delete('blog_post_list')
 
     class Meta:
         verbose_name = "Пост"
@@ -83,19 +90,23 @@ class Tag(models.Model):
 class Comment(models.Model):
 
     STATUS_CHOICES = (
-        ('unchecked', 'Не проверен'),
-        ('accepted', 'Проверен'),
-        ('rejected', 'Отклонен'),
+        ("unchecked", "Не проверен"),
+        ("accepted", "Проверен"),
+        ("rejected", "Отклонен"),
     )
-    text = models.TextField(verbose_name='Текст комментария', max_length=2000)
-    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='unchecked')
 
+    text = models.TextField(verbose_name="Текст комментария", max_length=2000)
+    status = models.CharField(
+        max_length=12, choices=STATUS_CHOICES, default="unchecked"
+    )
 
-    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='Автор')
+    author = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, verbose_name="Автор", related_name='comments'
+    )
 
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name="Пост", related_name='comments')
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
 

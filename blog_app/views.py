@@ -6,6 +6,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .templatetags.md_to_html import markdown_to_html
+from .forms import CommentForm
+from django.shortcuts import render, redirect
+from .models import Post, Tag
+from django.contrib import messages
 
 menu = [
     {"name": "Главная", "alias": "main"},
@@ -21,7 +25,7 @@ def blog(request) -> HttpResponse:
     search_tag = request.GET.get("search_tag")
     search_comments = request.GET.get("search_comments")
 
-    posts = Post.objects.filter(status="published")
+    posts = Post.objects.prefetch_related('tags').select_related('author').select_related('category').filter(status="published")
 
     if search_query:
         query = Q(title__icontains=search_query) | Q(text__icontains=search_query)
@@ -43,17 +47,36 @@ def blog(request) -> HttpResponse:
     return render(request, 'blog_app/blog.html', context=context)
 
 
-def post_by_slug(request, post_slug) -> HttpResponse:
-
+def post_by_slug(request, post_slug):
     post = get_object_or_404(Post, slug=post_slug)
-    Post.objects.filter(slug=post_slug).update(views=F('views') + 1)
+
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.status = 'unchecked'
+                comment.save()
+                messages.success(request, 'Ваш комментарий находится на модерации.')
+                return redirect('post_by_slug', post_slug=post_slug)
+        else:
+            messages.error(request, 'Для добавления комментария необходимо войти в систему.')
+            return redirect('login')
+    else:
+        form = CommentForm()
+
+    comments = post.comments.filter(status='accepted')
+
     context = {
-        "post": post,
-        "menu": menu,
-        "page_alias": "blog"
+        'post': post,
+        'form': form,
+        'comments': comments,
     }
 
-    return render(request, 'blog_app/post_detail.html', context=context, status=200)
+    return render(request, 'blog_app/post_detail.html', context)
 
 
 def index(request) -> HttpResponse:

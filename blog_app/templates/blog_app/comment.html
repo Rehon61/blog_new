@@ -1,0 +1,8 @@
+<div class="card mb-3">
+  <div class="card-body">
+    <p class="card-text">{{ comment.text }}</p>
+    <p class="card-subtitle text-muted">
+      <small>Автор: {{ comment.author.username }} | {{ comment.created_at|date:"d M Y H:i" }}</small>
+    </p>
+  </div>
+</div>

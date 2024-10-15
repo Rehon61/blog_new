@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load cache %}
 
 {% block title %}Каталог постов{% endblock %}
 
@@ -12,7 +13,7 @@
     <h1 class="mb-4">Каталог постов</h1>
 
     {% include 'blog_app/search_form.html' %}
-
+    {% cache 60 blog_post_list posts.number %}
     <div class="row">
         {% for post in posts %}
             {% if post.status == 'published' %}
@@ -26,5 +27,11 @@
             </div>
         {% endfor %}
     </div>
+    {% with page_obj=posts %}
+    {% if page_obj.has_other_pages %}
+{% include 'blog_app/pagination_include.html' %}
+{% endif %}
+    {% endwith %}
+    {% endcache %}
 </div>
 {% endblock %}
