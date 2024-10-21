@@ -1,49 +1,210 @@
-text-align: center;
+.hashtag {
+  display: inline-block;
+  background-color: #eee;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  border: 1px solid black;
+  box-shadow: 0 0 0.2em black;
+  font-size: 0.5em;
+}
+
+/* Основной контейнер занимает всю высоту экрана */
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Основной контент занимает все пространство между шапкой и подвалом */
+main {
+  flex: 1;
+}
+
+/* Стиль подвала */
+footer {
+  background-color: #343a40;
+  color: rgb(165, 165, 165);
+  text-align: center;
   padding: 1rem;
 }
+
 /* Базовые стили для ссылок меню */
 .navbar-nav .nav-link {
     color: #000000; /* Чёрный цвет текста */
     margin-right: 15px; /* Отступ между пунктами меню */
     transition: color 0.3s, background-color 0.3s;
 }
+
 /* Удаление отступа у последнего пункта меню */
 .navbar-nav .nav-item:last-child .nav-link {
     margin-right: 0;
 }
+
 /* Эффект при наведении на пункты меню */
 .navbar-nav .nav-link:hover {
     color: #000000; /* Оттенок жёлтого при наведении */
     background-color: rgba(255, 193, 7, 0.865); /* Полупрозрачный жёлтый фон при наведении */
     border-radius: 5px;
 }
+
 /* Стили для активного пункта меню */
 .navbar-nav .nav-link.active {
     color: #FFFFFF; /* Белый цвет текста */
     background-color: #343A40; /* Тёмный фон для активного пункта */
     border-radius: 5px;
 }
+
 /* Стили для тёмных кнопок */
 .btn-dark {
     background-color: #343A40; /* Тёмный цвет кнопки */
     border-color: #343A40;
     transition: background-color 0.3s, border-color 0.3s;
 }
+
+/* Изменение цвета кнопки при наведении */
 .btn-dark:hover {
     background-color: #23272B; /* Ещё темнее при наведении */
     border-color: #1D2124;
 }
+
 /* Дополнительные стили для улучшения внешнего вида меню */
 .navbar {
     padding: 10px 20px;
 }
+
+/* Ограничение высоты логотипа */
 .navbar-brand img {
     max-height: 40px;
 }
+
 /* Адаптивные настройки для мобильных устройств */
 @media (max-width: 767.98px) {
     .navbar-nav .nav-link {
         margin-right: 0;
         margin-bottom: 10px;
     }
+}
+
+/* Пагинатор */
+.pagination {
+    margin-top: 20px;
+}
+
+/* Стиль для ссылок пагинатора */
+.page-link {
+    color: #343a40;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+
+/* Стиль для активной страницы пагинатора */
+.page-item.active .page-link {
+    background-color: #343a40;
+    border-color: #343a40;
+}
+
+/* Эффект при наведении на ссылку пагинатора */
+.page-link:hover {
+    color: #fff;
+    background-color: #343a40;
+    border-color: #343a40;
+}
+
+/* Анимация для пагинатора */
+.pagination .page-link {
+    transition: all 0.3s ease;
+}
+
+/* Увеличение размера ссылки пагинатора при наведении */
+.pagination .page-item:hover .page-link {
+    transform: scale(1.05);
+}
+
+/* Контейнер для квадратного изображения */
+.square-image-container {
+    width: 100%;
+    padding-bottom: 100%; /* Создает квадратный контейнер */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Стиль для изображения внутри квадратного контейнера */
+.square-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Заполняет контейнер, сохраняя пропорции */
+}
+
+/* Контейнер для изображения поста */
+.post-image-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Стиль для изображения поста */
+.post-image-container img {
+  width: 100%;
+  height: auto;
+}
+
+/* Разрешение переноса текста в блоках кода */
+pre, code {
+    white-space: pre-wrap;       /* Позволяет переносить строки внутри блоков */
+    word-wrap: break-word;       /* Позволяет переносить длинные слова */
+    overflow-wrap: break-word;   /* Дополнительная поддержка переноса слов */
+}
+
+/* Стили для ссылок в хлебных крошках */
+.breadcrumb .breadcrumb-item a {
+    color: #000000; /* Черный цвет текста */
+    text-decoration: none;
+    transition: color 0.3s, background-color 0.3s;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* Эффект при наведении на ссылку в хлебных крошках */
+.breadcrumb .breadcrumb-item a:hover {
+    background-color: rgba(255, 193, 7, 0.865); /* Полупрозрачный желтый фон */
+}
+
+/* Стили для комментариев в стиле чата */
+.comment {
+  max-width: 75%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Стиль для комментария пользователя */
+.user-comment {
+  margin-left: auto;
+  background-color: #d1e7dd;
+  border: 1px solid #badbcc;
+}
+
+/* Стиль для комментария другого пользователя */
+.other-comment {
+  margin-right: auto;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+/* Стиль для имени автора комментария */
+.comment h6 {
+  font-weight: bold;
+}
+
+/* Стиль для текста комментария */
+.comment p {
+  margin-bottom: 0;
+}
+
+/* Стиль для иконки пользователя в комментарии */
+.comment .bi-person-fill {
+  color: #343a40;
 }

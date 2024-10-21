@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load md_to_html %}
 {% load static %}
-{% load cache %}
+
 
 {% block title %}{{ post.title }}{% endblock %}
 
@@ -86,6 +86,11 @@
       {% for comment in comments %}
         {% include 'blog_app/comment.html' %}
       {% endfor %}
+
+      {% if page_obj.has_other_pages %}
+      {% include 'blog_app/pagination_include.html' with page_obj=page_obj %}
+      {% endif %}
+
     {% else %}
       <p>Пока нет комментариев. Будьте первым!</p>
     {% endif %}

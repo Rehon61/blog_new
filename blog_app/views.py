@@ -10,6 +10,7 @@ from .forms import CommentForm
 from django.shortcuts import render, redirect
 from .models import Post, Tag
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage,PageNotAnInteger
 
 menu = [
     {"name": "Главная", "alias": "main"},
@@ -24,6 +25,7 @@ def blog(request) -> HttpResponse:
     search_category = request.GET.get("search_category")
     search_tag = request.GET.get("search_tag")
     search_comments = request.GET.get("search_comments")
+    page_number = request.GET.get('page', 1) # Получаем номер страницы из URL-параметра
 
     posts = Post.objects.prefetch_related('tags').select_related('author').select_related('category').filter(status="published")
 
@@ -43,7 +45,16 @@ def blog(request) -> HttpResponse:
 
     posts = posts.distinct().order_by("-created_at")
 
-    context = {"posts": posts, "menu": menu, "page_alias": "blog"}
+    paginator = Paginator(posts,2) # первый аргумент - кверисет, второй - сколько объектов на странице
+
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        posts = paginator.page(1) # Если параметр page не число, показываем первую страницу
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages) # Если страница
+
+    context = {"page_obj": posts, "menu": menu, "page_alias": "blog"}
     return render(request, 'blog_app/blog.html', context=context)
 
 
@@ -68,12 +79,21 @@ def post_by_slug(request, post_slug):
     else:
         form = CommentForm()
 
-    comments = post.comments.filter(status='accepted')
+    comments_list = post.comments.filter(status='accepted').order_by('created_at')
+    paginator = Paginator(comments_list, 20)  # 5 комментариев на страницу
+    page_number = request.GET.get('page')
+
+    try:
+        comments_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        comments_page = paginator.page(1)
+    except EmptyPage:
+        comments_page = paginator.page(paginator.num_pages)
 
     context = {
         'post': post,
         'form': form,
-        'comments': comments,
+        'comments': comments_page,
     }
 
     return render(request, 'blog_app/post_detail.html', context)
@@ -107,7 +127,6 @@ def add_post(request):
 
     # Если запрос типа POST - форма была отправлена и мы можем добавить пост
     elif request.method == "POST":
-
         title = request.POST['title']
         text = request.POST['text']
         tags = request.POST['tags']
