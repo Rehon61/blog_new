@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{# Определение заголовка страницы #}
+{% block title %}{{ operation_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {# Отображение заголовка операции #}
+    <h2>{{ operation_header }}</h2>
+
+    {# Вывод сообщений (если есть) #}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {# Форма для создания/редактирования категории #}
+    <form method="POST" action="">
+        {% csrf_token %}
+        {# Отображение полей формы #}
+        {{ form.as_p }}
+        {# Кнопка отправки формы #}
+        <button type="submit" class="btn btn-dark">{{ submit_button_text }}</button>
+        {# Кнопка отмены, ведущая на страницу категории #}
+        <a href="{% url 'blog' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

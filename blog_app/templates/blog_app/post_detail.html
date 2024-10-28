@@ -7,7 +7,6 @@
 
 {% block content %}
 <div class="container my-5">
-  {% comment %} {% cache 60 post_detail post.id %} {% endcomment %}
   <!-- Кнопка "Назад" -->
   <div class="mb-4">
     <a href="{% url 'blog' %}" class="btn btn-secondary">
@@ -22,7 +21,7 @@
 
   <!-- Отображение обложки, если она есть -->
   {% if post.cover_image %}
-    <div class="text-center mb-4">
+    <div class="post-image-container text-center mb-4">
       <img src="{{ post.cover_image.url }}" class="img-fluid rounded" alt="Обложка поста">
     </div>
   {% endif %}
@@ -40,7 +39,7 @@
       <i class="bi bi-eye me-1"></i>
       <span class="d-none d-sm-inline">{{ post.views }} просмотр{{ post.views|pluralize:"ов,а,ов" }}</span>
       <span class="d-inline d-sm-none">
-        <i class="bi bi-eye"></i>
+        {{ post.views }}
       </span>
     </div>
 

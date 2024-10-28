@@ -208,3 +208,12 @@ pre, code {
 .comment .bi-person-fill {
   color: #343a40;
 }
+
+.post-image-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.post-image-container img {
+  width: 100%;
+  height: auto;
+}

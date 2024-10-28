@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .templatetags.md_to_html import markdown_to_html
-from .forms import CommentForm, CategoryForm, TagForm
+from .forms import CommentForm, CategoryForm, TagForm, PostForm
 from django.shortcuts import render, redirect
 from .models import Post, Tag
 from django.contrib import messages
@@ -60,6 +60,12 @@ def blog(request) -> HttpResponse:
 
 def post_by_slug(request, post_slug):
     post = get_object_or_404(Post, slug=post_slug)
+
+    if f'post_{post.id}_viewed' not in request.session:
+        Post.objects.filter(id=post.id).update(views=F('views') + 1)
+        request.session[f'post_{post.id}_viewed'] = True
+
+    post.refresh_from_db()
 
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -116,49 +122,31 @@ def about(request) -> HttpResponse:
 
 
 def add_post(request):
-    context = {
-        'menu': menu,
-        'page_alias': 'add_post'
-    }
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=True, author=request.user)
+            messages.success(request, 'Пост успешно создан и отправлен на модерацию.')
+            return redirect('add_post')
+    else:
+        form = PostForm()
 
-    # Если запрос типа GET - вернем страничку с формой добавления поста
-    if request.method == "GET":
-        return render(request, 'blog_app/add_post.html', context=context)
+    return render(request, 'blog_app/add_post.html', {'form': form, 'menu': menu})
 
-    # Если запрос типа POST - форма была отправлена и мы можем добавить пост
-    elif request.method == "POST":
-        title = request.POST['title']
-        text = request.POST['text']
-        tags = request.POST['tags']
 
-        if Post.objects.filter(title=title).exists():
-            context.update({'message': 'Такой заголовок уже существует!'})
-            return render(request, 'blog_app/add_post.html', context=context)
+def update_post(request, post_slug):
+    post = get_object_or_404(Post, slug=post_slug)
 
-        user = request.user
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Пост успешно обновлен и отправлен на модерацию.')
+            return redirect('update_post', post_slug=post_slug)
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'blog_app/add_post.html', {'form': form, 'menu':menu})
 
-        if title and text and tags:
-            post = Post.objects.create(
-                title=title,
-                text=text,
-                author=user
-            )
-            tag_list = [tag.strip().lower().replace(' ', '_')
-                        for tag in tags.split(',')
-                        if tag.strip()
-                        ]
-
-            for tag_name in tag_list:
-                tag,created = Tag.objects.get_or_create(name=tag_name)
-                post.tags.add(tag)
-
-            context.update({'message': 'Пост успешно добавлен!'})
-            # return redirect( 'post_by_slug', post_slug=post.slug)
-        else:
-            context.update({'message': 'Заполните все поля!'})
-            return render(request, 'blog_app/add_post.html', context=context)
-
-    return render(request, 'blog_app/add_post.html', context=context)
 
 
 def posts_by_tag(request, tag):
@@ -188,26 +176,52 @@ def preview_post(request):
         html = markdown_to_html(text)
         return JsonResponse({"html": html})
 
+
 def add_category(request):
     context = {"menu": menu}
 
-    if request.method == "GET":
-        form = CategoryForm()
-        context['form'] = form
-        return render(request,'blog_app/add_category.html', context)
-
-    elif request.method =='POST':
+    if request.method == "POST":
         form = CategoryForm(request.POST)
         if form.is_valid():
-            # if Category.objects.filter(name=form.cleaned_data['name']).exists():
-            #     pass
+            form.save()
+            messages.success(request, f"Категория '{form.cleaned_data['name']}' успешно добавлена!")
+            return redirect('add_category')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки ниже.')
+    else:
+        form = CategoryForm()
 
-            name = form.cleaned_data['name']
-            Category.objects.create(name=name)
-            context['message'] = f'Категория {name} успешно добавлена!'
-            return render(request, "blog_app/add_category.html", context)
-        context['form'] = form
-        return render(request, "blog_app/add_category.html", context)
+    context.update({
+        "form": form,
+        "operation_title": "Добавить категорию",
+        "operation_header": "Добавить новую категорию",
+        "submit_button_text": "Создать",
+    })
+    return render(request, "blog_app/category_form.html", context)
+
+
+def update_category(request, category_slug):
+    category_obj = get_object_or_404(Category, slug=category_slug)
+    context = {"menu": menu, "catagory": category_obj}
+
+    if request.method == "POST":
+        form = CategoryForm(request.POST, instance=category_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Категория '{form.cleaned_data['name']}' успешно обновлена.")
+            return redirect('posts_by_category', category=category_obj.slug)
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки ниже.")
+    else:
+        form = CategoryForm(instance=category_obj)
+
+    context.update({
+        "form": form,
+        "operation_title": "Обновить категорию",
+        "operation_header": "Обновить категорию",
+        "submit_button_text": "Сохранить",
+    })
+    return render(request, "blog_app/category_form.html", context)
 
 
 def add_tag(request):

@@ -7,21 +7,22 @@
   <div class="row">
     <div class="col-6">
       <h1>Добавить пост</h1>
-      <form method="POST">
+      {% if message %}
+      <div class="alert alert-success">{{ message }}</div>
+      {% endif %}
+      <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="mb-3">
-          <label for="title" class="form-label">Заголовок поста</label>
-          <input type="text" class="form-control" name="title" id="title">
-        </div>
-
-        <div class="mb-3">
-          <label for="tags" class="form-label">Теги</label>
-          <input type="text" class="form-control" id="tags" name="tags" placeholder="например: django,python,веб разработка">
-        </div>
-        <div class="mb-3">
-          <label for="text" class="form-label">Текст поста</label>
-          <textarea class="form-control" id="text" name="text" rows="5"></textarea>
-        </div>
+        {% for field in form %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="alert alert-danger">
+                {{ field.errors }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
         <button type="submit" class="btn btn-primary">Отправить</button>
       </form>
     </div>
@@ -34,24 +35,22 @@
 
 <script>
 let timeout = null;
-document.getElementById('text').addEventListener('input', function() {
-    clearTimeout(timeout);
-    timeout = setTimeout(function() {
-        const text = document.getElementById('text').value;
-        fetch('{% url "preview_post" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({text: text})
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('preview').innerHTML = data.html;
-            hljs.highlightAll();
-        });
-    }, 1000);
+async function sendPreviewRequest(text) {
+    const response = await fetch('{% url "preview_post" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({text: text})
+    });
+    const data = await response.json();
+    document.getElementById('preview').innerHTML = data.html;
+    hljs.highlightAll();
+}
+document.getElementById('id_text').addEventListener('input', function() {
+  clearTimeout(timeout);
+   timeout = setTimeout(() => sendPreviewRequest(this.value), 1000);
 });
 </script>
 
