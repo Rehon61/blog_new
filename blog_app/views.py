@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from .models import Post, Tag
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage,PageNotAnInteger
+from django.contrib.auth.decorators import login_required, permission_required
 
 menu = [
     {"name": "Главная", "alias": "main"},
@@ -120,7 +121,7 @@ def about(request) -> HttpResponse:
     }
     return render(request, 'about.html', context=context)
 
-
+@login_required
 def add_post(request):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
@@ -133,7 +134,7 @@ def add_post(request):
 
     return render(request, 'blog_app/add_post.html', {'form': form, 'menu': menu})
 
-
+@login_required
 def update_post(request, post_slug):
     post = get_object_or_404(Post, slug=post_slug)
 
@@ -176,7 +177,7 @@ def preview_post(request):
         html = markdown_to_html(text)
         return JsonResponse({"html": html})
 
-
+@login_required
 def add_category(request):
     context = {"menu": menu}
 
@@ -199,7 +200,7 @@ def add_category(request):
     })
     return render(request, "blog_app/category_form.html", context)
 
-
+@login_required
 def update_category(request, category_slug):
     category_obj = get_object_or_404(Category, slug=category_slug)
     context = {"menu": menu, "catagory": category_obj}
@@ -223,7 +224,7 @@ def update_category(request, category_slug):
     })
     return render(request, "blog_app/category_form.html", context)
 
-
+@login_required
 def add_tag(request):
 
     context = {'menu': menu}

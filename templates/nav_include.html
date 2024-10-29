@@ -1,16 +1,38 @@
 {% load static %}
+{# Загрузка статических файлов #}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">
-      <img src="{% static 'images/logo.webp' %}" alt="ЛОГОТИП" style="height: 40px;"> <!-- Здесь укажите путь к вашему логотипу и задайте желаемый размер -->
+    {# Логотип и ссылка на главную страницу блога #}
+    <a class="navbar-brand" href="{% url 'blog' %}">
+      <img src="{% static 'images/logo.webp' %}" alt="ЛОГОТИП" style="height: 40px;">
     </a>
+
+    {# Проверка аутентификации пользователя #}
+    {% if user.is_authenticated %}
+      {# Отображение имени пользователя и кнопки выхода для авторизованных пользователей #}
+      <span class="navbar-text me-3">
+        {{ user.username }}
+      </span>
+      <form method="post" action="{% url 'logout' %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link nav-link p-0 m-0 align-baseline">Выйти</button>
+      </form>
+    {% else %}
+      {# Ссылки на вход и регистрацию для неавторизованных пользователей #}
+      <a class="nav-link me-3" href="{% url 'login' %}">Вход</a>
+      <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+    {% endif %}
+
+    {# Кнопка-гамбургер для мобильного меню #}
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Переключатель навигации">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <ul class="navbar-nav ms-auto">
+        {# Цикл для отображения пунктов меню #}
         {% for item in menu %}
         <li class="nav-item">
+          {# Активный пункт меню выделяется классом 'active' #}
           <a class="nav-link {% if item.alias == page_alias %}active{% endif %}" href="{% url item.alias %}">{{ item.name }}</a>
         </li>
         {% endfor %}
