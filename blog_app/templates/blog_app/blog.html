@@ -4,6 +4,9 @@
 
 {% block title %}Каталог постов{% endblock %}
 
+{% block breadcrumbs %}
+    {% include 'breadcrumbs.html' %}
+{% endblock %}
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}" />
 {% endblock %}
@@ -13,9 +16,14 @@
     <h1 class="mb-4">Каталог постов</h1>
 
     {% include 'blog_app/search_form.html' %}
-    {% cache 60 blog_post_list page_obj.number %}
+    {% comment %}
+    300 - время кеширования в секундах
+    blog_post_list - название кеша
+    page_obj.number - номер текущей страницы (Позволяет правильно кешировать постранично)
+    {% endcomment %}
+    {% cache 60 blog_post_list posts.number %}
     <div class="row">
-        {% for post in page_obj %}
+        {% for post in posts %}
             {% if post.status == 'published' %}
                 <div class="col-md-6 mb-4">
                     {% include 'blog_app/post_preview_include.html' %}
@@ -27,10 +35,16 @@
             </div>
         {% endfor %}
     </div>
+    {% comment %} Пагинатор {% endcomment %}
+    {% comment %} Проверяем, что есть другие страницы {% endcomment %}
+    {% with page_obj=posts %}
     {% if page_obj.has_other_pages %}
-        {% include 'blog_app/pagination_include.html' %}
-    {% endif %}
-
+{% include 'blog_app/pagination_include.html' %}
+{% endif %}
+{% endwith %}
     {% endcache %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

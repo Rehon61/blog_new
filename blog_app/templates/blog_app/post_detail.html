@@ -1,22 +1,35 @@
 {% extends 'base.html' %}
-{% load md_to_html %}
-{% load static %}
 
+{% load static %}
+{% load md_to_html %}
 
 {% block title %}{{ post.title }}{% endblock %}
 
+
+
 {% block content %}
 <div class="container my-5">
-  <!-- Кнопка "Назад" -->
-  <div class="mb-4">
-    <a href="{% url 'blog' %}" class="btn btn-secondary">
-      <span class="d-none d-sm-inline">
-        <i class="bi bi-arrow-left-circle me-2"></i> Назад
-      </span>
-      <span class="d-inline d-sm-none">
-        <i class="bi bi-arrow-left-circle"></i>
-      </span>
+  <!-- Заголовок поста -->
+  <h1 class="mb-3">{{ post.title }}</h1>
+  <!-- Хлебные крошки под заголовком
+  1. Вызываем блок базового шаблона (чтобы они не отображались там где не надо)
+  2. Подключаем их там где надо :)
+  -->
+  {% block breadcrumbs %}
+  {% endblock %}
+  {% include 'breadcrumbs.html' %}
+  <!-- Контейнер для кнопок -->
+  <div class="mb-4 d-flex">
+    <!-- Кнопка "Назад" для возврата к списку постов -->
+    <a href="{% url 'blog' %}" class="btn btn-secondary me-2">
+      <i class="bi bi-arrow-left-circle me-1"></i> Назад
     </a>
+    <!-- Кнопка редактирования поста, доступная только для администраторов -->
+    {% if user.is_staff %}
+      <a href="{% url 'update_post' post.slug %}" class="btn btn-outline-dark">
+        <i class="bi bi-pencil me-1"></i> Редактировать пост
+      </a>
+    {% endif %}
   </div>
 
   <!-- Отображение обложки, если она есть -->
@@ -26,43 +39,47 @@
     </div>
   {% endif %}
 
-  <!-- Заголовок поста -->
-  <h1 class="mb-4">{{ post.title }}</h1>
+
 
   <!-- Информация о посте -->
   <div class="d-flex flex-wrap align-items-center mb-4 bg-light p-3 rounded">
+    <!-- Отображение автора поста -->
     <div class="me-3">
       <i class="bi bi-person-circle me-1"></i> {{ post.author.username }}
     </div>
 
+     <!-- Отображение количества просмотров -->
     <div class="me-3">
       <i class="bi bi-eye me-1"></i>
-      <span class="d-none d-sm-inline">{{ post.views }} просмотр{{ post.views|pluralize:"ов,а,ов" }}</span>
-      <span class="d-inline d-sm-none">
-        {{ post.views }}
-      </span>
+      <span>{{ post.views }}</span>
     </div>
 
-{% if post.category %}
-  <div class="me-3">
-    <span class="badge bg-warning text-dark">
-      <i class="bi bi-grid me-1"></i>
-      <a href="{{ post.category.get_absolute_url }}" class="text-dark text-decoration-none">{{ post.category.name }}</a>
-    </span>
-  </div>
-{% else %}
-  <div class="me-3">
-    <span class="badge bg-secondary">Без категории</span>
-  </div>
-{% endif %}
+ <!-- Отображение категории поста -->
+    {% if post.category %}
+      <div class="me-3">
+        <span class="badge bg-warning text-dark">
+          <i class="bi bi-grid me-1"></i>
+          <a href="{{ post.category.get_absolute_url }}" class="text-dark text-decoration-none">{{ post.category.name }}</a>
+        </span>
+      </div>
+    {% else %}
+      <div class="me-3">
+        <span class="badge bg-secondary">Без категории</span>
+      </div>
+    {% endif %}
+    <!-- Отображение даты создания поста -->
 
     <div>
       <i class="bi bi-calendar me-1"></i> {{ post.created_at|date:"d M Y" }}
     </div>
   </div>
 
+   <!-- Разделитель -->
+  <hr class="my-4">
+
   <!-- Текст поста -->
   <div class="post-content mb-4">
+    <!-- Преобразование Markdown в HTML -->
     {% md_to_html post.text %}
   </div>
 
@@ -77,19 +94,21 @@
       {% endfor %}
     </div>
   </div>
+   <!-- Разделитель -->
+  <hr class="my-4">
 
   <!-- Комментарии -->
   <div class="mb-4">
     <h3>Комментарии</h3>
+    <!-- Отображение комментариев, если они есть -->
     {% if comments %}
       {% for comment in comments %}
         {% include 'blog_app/comment.html' %}
       {% endfor %}
-
-      {% if page_obj.has_other_pages %}
-      {% include 'blog_app/pagination_include.html' with page_obj=page_obj %}
+      <!-- Пагинация комментариев -->
+      {% if comments.has_other_pages %}
+        {% include 'blog_app/pagination_include.html' with page_obj=comments %}
       {% endif %}
-
     {% else %}
       <p>Пока нет комментариев. Будьте первым!</p>
     {% endif %}
@@ -98,15 +117,15 @@
   <!-- Форма добавления комментария -->
   <div class="mb-4">
     <h3>Оставить комментарий</h3>
-    {% if user.is_authenticated %}
-      <form method="post">
-        {% csrf_token %}
+     <form method="post" action="{% if user.is_authenticated %}{% url 'post_by_slug' post.slug %}{% else %}{% url 'login' %}?next={{ request.path }}{% endif %}">
+      {% csrf_token %}
+      {% if user.is_authenticated %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-dark">Отправить</button>
-      </form>
-    {% else %}
-      <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a>, чтобы оставить комментарий.</p>
-    {% endif %}
+       {% else %}
+        <p>Пожалуйста, <button type="submit" class="btn btn-link p-0 m-0 align-baseline">войдите</button>, чтобы оставить комментарий.</p>
+      {% endif %}
+    </form>
   </div>
 </div>
 {% endblock %}

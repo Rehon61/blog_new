@@ -49,10 +49,15 @@
                     {% endfor %}
                 </p>
                 <div class="mt-auto d-flex justify-content-end">
-                    <a href="{% url 'post_by_slug' post.slug %}" class="btn btn-dark">
+                    <a href="{% url 'post_by_slug' post.slug %}" class="btn btn-dark me-2">
                         <span class="d-inline d-sm-none"><i class="bi bi-book"></i></span>
                         <span class="d-none d-sm-inline">Читать пост</span>
                     </a>
+                     {% if user.is_staff %}
+                        <a href="{% url 'update_post' post.slug %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

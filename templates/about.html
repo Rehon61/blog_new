@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
-{% load cache %}
+
 
 
 {% block title %}О проекте{% endblock %}
 
+{% block breadcrumbs %}
+    {% include 'breadcrumbs.html' %}
+{% endblock %}
+
 {% block content %}
-{% cache 3600 about_page %}
+
 <div class="container">
     <h1>О проекте</h1>
     <p>Это заглушка для страницы "О проекте".</p>
 </div>
-{% endcache %}
+
 {% endblock %}

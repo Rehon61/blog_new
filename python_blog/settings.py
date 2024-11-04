@@ -132,4 +132,12 @@ INTERNAL_IPS = [
 ]
 
 LOGIN_REDIRECT_URL = 'main'
-LOGIN_URL = 'login'
+LOGIN_URL = 'login'  # URL страницы входа
+
+
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+AUTH_USER_MODEL = 'users.User'
