@@ -1,17 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load md_to_html %}
-{% block content %}
 
+{% block content %}
 <div class="container mt-4">
+
   <h1 class="mb-4">Добавить пост</h1>
+
+  {# Отображение сообщений об успехе или ошибках #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
   <div class="row">
-    <div class="col-lg-12 mb-4">
+    <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-header">
           Форма поста
         </div>
         <div class="card-body">
+          {# Форма для создания нового поста #}
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form %}
@@ -31,14 +44,48 @@
       </div>
     </div>
 
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          Предпросмотр
+        </div>
+        <div class="card-body">
+          {# Область для отображения предпросмотра поста #}
+          <div id="preview" style="max-height: 600px; overflow-y: auto;">
+            <!-- Здесь будет отображаться предпросмотр -->
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-
-
-{% endblock %}
-
 {% block scripts %}
-<script src="{% static 'js/editor.js' %}"></script>
+{{ block.super }}
+<script>
+let timeout = null;
+
+{# Функция для отправки запроса на предпросмотр #}
+async function sendPreviewRequest(text) {
+    const response = await fetch('{% url "preview_post" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({text: text})
+    });
+    const data = await response.json();
+    document.getElementById('preview').innerHTML = data.html;
+    hljs.highlightAll();
+}
+
+{# Обработчик события ввода текста для реализации живого предпросмотра #}
+document.getElementById('id_text').addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => sendPreviewRequest(this.value), 500);
+});
+</script>
+{% endblock %}
 
 {% endblock %}
